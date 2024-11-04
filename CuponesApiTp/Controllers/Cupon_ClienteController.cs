@@ -93,7 +93,7 @@ namespace CuponesApiTp.Controllers
                 }
                 else
                 {
-                    throw;
+                    return Ok("Se dio de alta el registro en Cupon_Cliente");
                 }
             }
 
