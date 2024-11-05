@@ -8,7 +8,7 @@ namespace ClientesApi.Data
     public class DataBaseContext : DbContext
     {
         public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
-        DbSet<ClienteModel> Clientes { get; set; }
+        public DbSet<ClienteModel> Clientes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
