@@ -6,7 +6,7 @@ namespace CuponesApiTp.Services
 {
     public class SendEmailService : ISendEmailService
     {
-        public async Task EnviarEmailCliente(string emailCliente, string nroCupon)
+        public async Task EnviarEmailCliente(string emailCliente, string nroCupon, string Subject, string messageBody)
         {
             string emailDesde = "programacioniv.agus@gmail.com";
             string emailClave = "dscq ndky eive xpku";
@@ -22,8 +22,8 @@ namespace CuponesApiTp.Services
                 MailMessage message = new MailMessage();
                 message.From = new MailAddress(emailDesde, "ProgramacionIV");
                 message.To.Add(emailCliente);
-                message.Subject = "Numero de cupon asignado.";
-                message.Body = $"Su numero de cupon es: {nroCupon}.";
+                message.Subject = Subject;
+                message.Body = messageBody;
 
                 await smtpClient.SendMailAsync(message);
             }

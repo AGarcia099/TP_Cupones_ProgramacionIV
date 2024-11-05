@@ -45,7 +45,9 @@ namespace CuponesApiTp.Controllers
                 _context.Cupones_Clientes.Add(cupon_Cliente);
                 await _context.SaveChangesAsync();
 
-                await _sendEmailService.EnviarEmailCliente(clienteDto.Email, nroCupon);
+                var subject = "Numero de cupon asignado";
+                var messageBody = $"Su numero de cupon es: {nroCupon}";
+                await _sendEmailService.EnviarEmailCliente(clienteDto.Email, nroCupon, subject, messageBody);
 
                 return Ok(new
                 {
@@ -89,10 +91,18 @@ namespace CuponesApiTp.Controllers
                 // Eliminar el registro de Cupones_Clientes
                 _context.Cupones_Clientes.Remove(cuponCliente);
 
-                // Guardar cambios en la base de datos
                 await _context.SaveChangesAsync();
 
-                // Devolver mensaje de éxito
+                var clienteDto = new ClienteDto
+                {
+                    Email = "programacioniv.agus@gmail.com",
+                    CodCliente = cuponCliente.CodCliente
+                };
+
+                var subject = "Numero de cupon usado";
+                var messageBody = $"Ha usado el cupon: {quemarCuponDto.NroCupon}.";
+                await _sendEmailService.EnviarEmailCliente(clienteDto.Email, quemarCuponDto.NroCupon, subject, messageBody);
+
                 return Ok(new { Mensaje = "El cupón fue utilizado correctamente." });
             }
             catch (Exception ex)
