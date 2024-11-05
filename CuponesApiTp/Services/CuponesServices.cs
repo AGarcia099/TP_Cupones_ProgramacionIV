@@ -6,8 +6,15 @@ namespace CuponesApiTp.Services
     {
         public async Task<string> GenerarNroCupon()
         {
-            var NroCupon = "123-456-789";
-            return NroCupon;
+            Random random = new Random();
+
+            int parte1 = random.Next(100, 1000);
+            int parte2 = random.Next(100, 1000);
+            int parte3 = random.Next(100, 1000);
+
+            string nroCupon = $"{parte1}-{parte2}-{parte3}";
+
+            return nroCupon;
         }
     }
 }

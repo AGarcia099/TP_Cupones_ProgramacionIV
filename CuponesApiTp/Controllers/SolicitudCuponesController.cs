@@ -4,6 +4,7 @@ using CuponesApiTp.Models;
 using CuponesApiTp.Models.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CuponesApiTp.Controllers
@@ -48,9 +49,51 @@ namespace CuponesApiTp.Controllers
 
                 return Ok(new
                 {
-                    Mensaje = "Se dio de alta el registro. Se envio un correo con los detalles",
+                    Mensaje = $"Se ha asignado el cupon {clienteDto.Id_Cupon} al cliente {clienteDto.CodCliente}",
                     NroCupon = nroCupon
                 });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("QuemadoCupon")]
+        public async Task<IActionResult> QuemarCupon([FromBody] QuemarCuponDto quemarCuponDto)
+        {
+            try
+            {
+                // Validar que el número de cupón no esté vacío
+                if (string.IsNullOrEmpty(quemarCuponDto.NroCupon))
+                    throw new Exception("El número de cupón no puede estar vacío");
+
+                // Buscar el cupón en Cupones_Clientes
+                var cuponCliente = await _context.Cupones_Clientes
+                    .FirstOrDefaultAsync(c => c.NroCupon == quemarCuponDto.NroCupon);
+
+                if (cuponCliente == null)
+                    throw new Exception("El cupón no existe o ya ha sido utilizado");
+
+                // Insertar registro en Cupones_Historial
+                var historialRegistro = new Cupones_HistorialModel
+                {
+                    NroCupon = cuponCliente.NroCupon,
+                    CodCliente = cuponCliente.CodCliente,
+                    Id_Cupon = cuponCliente.Id_Cupon,
+                    FechaUso = DateTime.Now
+                };
+
+                _context.Cupones_Historial.Add(historialRegistro);
+
+                // Eliminar el registro de Cupones_Clientes
+                _context.Cupones_Clientes.Remove(cuponCliente);
+
+                // Guardar cambios en la base de datos
+                await _context.SaveChangesAsync();
+
+                // Devolver mensaje de éxito
+                return Ok(new { Mensaje = "El cupón fue utilizado correctamente." });
             }
             catch (Exception ex)
             {
