@@ -25,21 +25,38 @@ namespace CuponesApiTp.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cupon_ClienteModel>>> GetCupones_Clientes()
         {
-            return await _context.Cupones_Clientes.ToListAsync();
+            try
+            {
+                var cuponesClientes = await _context.Cupones_Clientes.ToListAsync();
+                
+                if(cuponesClientes == null || !cuponesClientes.Any())
+                    return NotFound("No hay cupon_clientes.");
+
+                return Ok(cuponesClientes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema al obtener los cupon_clientes. Error: {ex.Message}");
+            }
         }
 
         // GET: api/Cupon_Cliente/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Cupon_ClienteModel>> GetCupon_ClienteModel(string id)
         {
-            var cupon_ClienteModel = await _context.Cupones_Clientes.FindAsync(id);
-
-            if (cupon_ClienteModel == null)
+            try
             {
-                return NotFound();
-            }
+                var cupon_ClienteModel = await _context.Cupones_Clientes.FindAsync(id);
 
-            return cupon_ClienteModel;
+                if (cupon_ClienteModel == null)
+                    return NotFound($"El cupon_cliente con el ID '{id}' no existe.");
+
+                return Ok(cupon_ClienteModel);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema al obtener el cupon_cliente. Error: {ex.Message}");
+            }
         }
 
         // PUT: api/Cupon_Cliente/5
@@ -49,7 +66,7 @@ namespace CuponesApiTp.Controllers
         {
             if (id != cupon_ClienteModel.NroCupon)
             {
-                return BadRequest();
+                return BadRequest("El ID proporcionado no coincide con el NroCupon del cupon_cliente.");
             }
 
             _context.Entry(cupon_ClienteModel).State = EntityState.Modified;
@@ -57,20 +74,24 @@ namespace CuponesApiTp.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                return Ok($"Los datos del cupon_cliente con ID '{id}' fueron modificados correctamente.");
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!Cupon_ClienteModelExists(id))
                 {
-                    return NotFound();
+                    return NotFound($"No existe ningun cupon_cliente con el ID '{id}'");
                 }
                 else
                 {
                     throw;
                 }
             }
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest($"Ocurrió un error al intentar modificar el cupon_cliente. Error: {ex.Message}");
+            }
         }
 
         // POST: api/Cupon_Cliente
@@ -89,12 +110,16 @@ namespace CuponesApiTp.Controllers
             {
                 if (Cupon_ClienteModelExists(cupon_ClienteModel.NroCupon))
                 {
-                    return Conflict();
+                    return Conflict($"El cupon_cliente con NroCupon '{cupon_ClienteModel.NroCupon}' ya existe.");
                 }
                 else
                 {
                     return Ok("Se dio de alta el registro en Cupon_Cliente");
                 }
+            }
+            catch(Exception ex)
+            {
+                return BadRequest($"Ocurrió un error inesperado: {ex.Message}");
             }
 
             return CreatedAtAction("GetCupon_ClienteModel", new { id = cupon_ClienteModel.NroCupon }, cupon_ClienteModel);
@@ -104,16 +129,24 @@ namespace CuponesApiTp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCupon_ClienteModel(string id)
         {
-            var cupon_ClienteModel = await _context.Cupones_Clientes.FindAsync(id);
-            if (cupon_ClienteModel == null)
+            try
             {
-                return NotFound();
+                var cupon_ClienteModel = await _context.Cupones_Clientes.FindAsync(id);
+                
+                if (cupon_ClienteModel == null)
+                {
+                    return NotFound($"El cupon_cliente con NroCupon '{id}' no existe.");
+                }
+
+                _context.Cupones_Clientes.Remove(cupon_ClienteModel);
+                await _context.SaveChangesAsync();
+
+                return Ok($"El cupon_cliente con NroCupon '{id}' fue eliminado correctamente.");
             }
-
-            _context.Cupones_Clientes.Remove(cupon_ClienteModel);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest($"Ocurrió un error al intentar eliminar el cupon_cliente: {ex.Message}");
+            }
         }
 
         private bool Cupon_ClienteModelExists(string id)

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CuponesApiTp.Data;
 using CuponesApiTp.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CuponesApiTp.Controllers
 {
@@ -25,21 +26,42 @@ namespace CuponesApiTp.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ArticuloModel>>> GetArticulos()
         {
-            return await _context.Articulos.Include(a => a.Precio).ToListAsync();
+            try
+            {
+                var articulos = await _context.Articulos.Include(a => a.Precio).ToListAsync();
+
+                if (articulos.Count == 0)
+                {
+                    return NotFound("No hay articulos");
+                }
+
+                return Ok(articulos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema. Error: {ex.Message}");
+            }
         }
 
         // GET: api/Articulos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ArticuloModel>> GetArticuloModel(int id)
         {
-            var articuloModel = await _context.Articulos.FindAsync(id);
-
-            if (articuloModel == null)
+            try
             {
-                return NotFound();
-            }
+                var articuloModel = await _context.Articulos.FindAsync(id);
 
-            return articuloModel;
+                if (articuloModel == null)
+                {
+                    return NotFound($"No existe un articulo con el id {id}.");
+                }
+
+                return Ok(articuloModel);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema. Error: {ex.Message}");
+            }
         }
 
         // PUT: api/Articulos/5
@@ -49,7 +71,7 @@ namespace CuponesApiTp.Controllers
         {
             if (id != articuloModel.Id_Articulo)
             {
-                return BadRequest();
+                return BadRequest("El ID proporcionado no coincide con el ID del artículo.");
             }
 
             _context.Entry(articuloModel).State = EntityState.Modified;
@@ -62,15 +84,14 @@ namespace CuponesApiTp.Controllers
             {
                 if (!ArticuloModelExists(id))
                 {
-                    return NotFound();
+                    return NotFound($"El ID {id} no existe.");
                 }
                 else
                 {
                     throw;
                 }
             }
-
-            return NoContent();
+            return Ok("Se modificaron los datos del articulo correctamente.");
         }
 
         // POST: api/Articulos
@@ -78,26 +99,51 @@ namespace CuponesApiTp.Controllers
         [HttpPost]
         public async Task<ActionResult<ArticuloModel>> PostArticuloModel(ArticuloModel articuloModel)
         {
-            _context.Articulos.Add(articuloModel);
-            await _context.SaveChangesAsync();
+            try
+            {
 
-            return CreatedAtAction("GetArticuloModel", new { id = articuloModel.Id_Articulo }, articuloModel);
+                if (string.IsNullOrEmpty(articuloModel.Nombre_Articulo))
+                    return BadRequest("El nombre del artículo es obligatorio.");
+
+                if (string.IsNullOrEmpty(articuloModel.Descripcion_Articulo))
+                    return BadRequest("La descripción del artículo es obligatoria.");
+
+                var articuloExistente = await _context.Articulos
+                    .FirstOrDefaultAsync(a => a.Nombre_Articulo == articuloModel.Nombre_Articulo);
+                if (articuloExistente != null)
+                    return BadRequest($"Ya existe un artículo con el nombre '{articuloModel.Nombre_Articulo}'.");
+
+                _context.Articulos.Add(articuloModel);
+                await _context.SaveChangesAsync();
+
+                return Ok($"El artículo '{articuloModel.Nombre_Articulo}' fue creado exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema. Error: {ex.Message}");
+            }
         }
 
         // DELETE: api/Articulos/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticuloModel(int id)
         {
-            var articuloModel = await _context.Articulos.FindAsync(id);
-            if (articuloModel == null)
+            try
             {
-                return NotFound();
+                var articuloModel = await _context.Articulos.FindAsync(id);
+
+                if (articuloModel == null)
+                    return NotFound($"No existe ningún artículo con el ID {id}.");
+
+                _context.Articulos.Remove(articuloModel);
+                await _context.SaveChangesAsync();
+
+                return Ok($"El artículo con ID {id} fue eliminado correctamente.");
             }
-
-            _context.Articulos.Remove(articuloModel);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema al intentar eliminar el artículo. Error: {ex.Message}");
+            }
         }
 
         private bool ArticuloModelExists(int id)

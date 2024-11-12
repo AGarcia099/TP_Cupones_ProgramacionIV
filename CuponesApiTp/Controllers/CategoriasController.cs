@@ -25,25 +25,46 @@ namespace CuponesApiTp.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoriaModel>>> GetCategorias()
         {
-            return await _context
-                .Categorias
-                .Include(c => c.Cupones_Categorias)
-                    .ThenInclude(cc => cc.Cupon)
-                .ToListAsync();
+            try
+            {
+                var categorias = await _context
+                    .Categorias
+                    .Include(c => c.Cupones_Categorias)
+                        .ThenInclude(cc => cc.Cupon)
+                    .ToListAsync();
+
+                if (categorias.Count == 0)
+                {
+                    return NotFound("No existe ninguna categoría.");
+                }
+
+                return Ok(categorias);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema al obtener las categorías. Error: {ex.Message}");
+            }
         }
 
         // GET: api/Categorias/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoriaModel>> GetCategoriaModel(int id)
         {
-            var categoriaModel = await _context.Categorias.FindAsync(id);
-
-            if (categoriaModel == null)
+            try
             {
-                return NotFound();
-            }
+                var categoriaModel = await _context.Categorias.FindAsync(id);
 
-            return categoriaModel;
+                if (categoriaModel == null)
+                {
+                    return NotFound($"No existe ninguna categoria con el id {id}");
+                }
+
+                return categoriaModel;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema. Error: {ex.Message}");
+            }
         }
 
         // PUT: api/Categorias/5
@@ -53,7 +74,7 @@ namespace CuponesApiTp.Controllers
         {
             if (id != categoriaModel.Id_Categoria)
             {
-                return BadRequest();
+                return BadRequest("El ID proporcionado no coincide con el de la categoría que intenta actualizar.");
             }
 
             _context.Entry(categoriaModel).State = EntityState.Modified;
@@ -61,20 +82,20 @@ namespace CuponesApiTp.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                return Ok($"Los datos de la categoria con id {id} fueron modificados correctamente");
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!CategoriaModelExists(id))
                 {
-                    return NotFound();
+                    return NotFound($"No existe una categoria con el id {id}");
                 }
                 else
                 {
                     throw;
                 }
             }
-
-            return NoContent();
         }
 
         // POST: api/Categorias
@@ -82,26 +103,51 @@ namespace CuponesApiTp.Controllers
         [HttpPost]
         public async Task<ActionResult<CategoriaModel>> PostCategoriaModel(CategoriaModel categoriaModel)
         {
-            _context.Categorias.Add(categoriaModel);
-            await _context.SaveChangesAsync();
+            if (string.IsNullOrEmpty(categoriaModel.Nombre))
+                return BadRequest("El nombre de la categoría es obligatorio.");
 
-            return CreatedAtAction("GetCategoriaModel", new { id = categoriaModel.Id_Categoria }, categoriaModel);
+            try
+            {
+                var categoriaExistente = await _context.Categorias
+                                                .FirstOrDefaultAsync(c => c.Nombre == categoriaModel.Nombre);
+
+                if (categoriaExistente != null)
+                {
+                    return BadRequest($"La categoria con el nombre '{categoriaModel.Nombre}' ya existe.");
+                }
+
+                _context.Categorias.Add(categoriaModel);
+                await _context.SaveChangesAsync();
+
+                return Ok($"La categoria '{categoriaModel.Nombre}' fue creada con exito");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema al crear la categoria. Error: {ex.Message}");
+            }
         }
 
         // DELETE: api/Categorias/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategoriaModel(int id)
         {
-            var categoriaModel = await _context.Categorias.FindAsync(id);
-            if (categoriaModel == null)
+            try
             {
-                return NotFound();
+                var categoriaModel = await _context.Categorias.FindAsync(id);
+                if (categoriaModel == null)
+                {
+                    return NotFound($"No existe una categoria con el id {id}.");
+                }
+
+                _context.Categorias.Remove(categoriaModel);
+                await _context.SaveChangesAsync();
+
+                return Ok($"La categoria con id {id} fue borrada exitosamente.");
             }
-
-            _context.Categorias.Remove(categoriaModel);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest($"Hubo un problema al eliminar la categoria. Error: {ex.Message}");
+            }
         }
 
         private bool CategoriaModelExists(int id)

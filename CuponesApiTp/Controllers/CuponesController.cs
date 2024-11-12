@@ -25,26 +25,47 @@ namespace CuponesApiTp.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CuponModel>>> GetCupones()
         {
-            return await _context
-                .Cupones
-                .Include(c => c.Cupones_Categorias)
-                    .ThenInclude(cc => cc.Categoria)
-                .Include(c => c.Tipo_Cupon)
-                .ToListAsync();
+            try
+            {
+                var cupones =  await _context
+                    .Cupones
+                    .Include(c => c.Cupones_Categorias)
+                        .ThenInclude(cc => cc.Categoria)
+                    .Include(c => c.Tipo_Cupon)
+                    .ToListAsync();
+
+                if(cupones == null || !cupones.Any())
+                    return NotFound("No hay cupones");
+
+                return Ok(cupones);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest($"Ocurrió un error al obtener los cupones: {ex.Message}");
+            }
         }
 
         // GET: api/Cupones/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CuponModel>> GetCuponModel(int id)
         {
-            var cuponModel = await _context.Cupones.FindAsync(id);
-
-            if (cuponModel == null)
+            try
             {
-                return NotFound();
-            }
+                var cuponModel = await _context.Cupones
+                    .Include(c => c.Cupones_Categorias)
+                        .ThenInclude(cc => cc.Categoria)
+                    .Include(c => c.Tipo_Cupon)
+                    .FirstOrDefaultAsync(c => c.Id_Cupon == id);
 
-            return cuponModel;
+                if (cuponModel == null)
+                    return NotFound($"No existe un cupon con el Id_Cupon '{id}'.");
+
+                return Ok(cuponModel);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Ocurrió un error al obtener el cupon con Id_Cupon {id}: {ex.Message}");
+            }
         }
 
         // PUT: api/Cupones/5
@@ -54,7 +75,12 @@ namespace CuponesApiTp.Controllers
         {
             if (id != cuponModel.Id_Cupon)
             {
-                return BadRequest();
+                return BadRequest($"El ID {id} no coincide");
+            }
+
+            if (!CuponModelExists(id))
+            {
+                return NotFound($"El cupon con Id_Cupon '{id}' no existe");
             }
 
             _context.Entry(cuponModel).State = EntityState.Modified;
@@ -62,20 +88,12 @@ namespace CuponesApiTp.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok($"El cupon con Id_Cupon '{id}' ha sido actualizado exitosamente");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!CuponModelExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest($"Ocurrió un error al intentar actualizar el cupon con Id_Cupon '{id}': {ex.Message}");
             }
-
-            return NoContent();
         }
 
         // POST: api/Cupones
@@ -83,26 +101,48 @@ namespace CuponesApiTp.Controllers
         [HttpPost]
         public async Task<ActionResult<CuponModel>> PostCuponModel(CuponModel cuponModel)
         {
-            _context.Cupones.Add(cuponModel);
-            await _context.SaveChangesAsync();
+            if (string.IsNullOrEmpty(cuponModel.Nombre))
+                return BadRequest("El nombre del cupon es obligatorio");
 
-            return CreatedAtAction("GetCuponModel", new { id = cuponModel.Id_Cupon }, cuponModel);
+            if (cuponModel.FechaInicio >= cuponModel.FechaFin)
+                return BadRequest("La fecha de inicio debe ser anterior a la fecha de finalización.");
+
+            try
+            {
+                _context.Cupones.Add(cuponModel);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetCuponModel", new { id = cuponModel.Id_Cupon }, cuponModel);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Ocurrió un error inesperado al intentar crear el cupon: {ex.Message}");
+            }
         }
+            
 
         // DELETE: api/Cupones/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCuponModel(int id)
         {
-            var cuponModel = await _context.Cupones.FindAsync(id);
-            if (cuponModel == null)
+            try
             {
-                return NotFound();
+                var cuponModel = await _context.Cupones.FindAsync(id);
+                
+                if (cuponModel == null)
+                {
+                    return NotFound($"El cupon con Id_Cupon '{id}' no existe.");
+                }
+
+                _context.Cupones.Remove(cuponModel);
+                await _context.SaveChangesAsync();
+
+                return Ok($"El cupon con Id_Cupon '{id}' se elimino exitosamente.");
             }
-
-            _context.Cupones.Remove(cuponModel);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch(Exception ex)
+            {
+                return BadRequest($"Ocurrió un error al intentar eliminar el cupon con Id_Cupon '{id}': {ex.Message}");
+            }
         }
 
         private bool CuponModelExists(int id)

@@ -30,7 +30,7 @@ namespace CuponesApiTp.Controllers
             try
             {
                 if (clienteDto.CodCliente.IsNullOrEmpty())
-                    throw new Exception("El Dni del cliente no puede estar vacio");
+                    throw new Exception("El CodCliente no puede estar vacio");
 
                 string nroCupon = await _cuponesServices.GenerarNroCupon();
 
