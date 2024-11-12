@@ -4,10 +4,15 @@ using System.Data.Common;
 using System.Text.Json.Serialization;
 using CuponesApiTp.Interfaces;
 using CuponesApiTp.Services;
+using Microsoft.Extensions.Hosting.WindowsServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+if (WindowsServiceHelpers.IsWindowsService())
+{
+    builder.Host.UseWindowsService();
+    builder.WebHost.UseContentRoot(AppContext.BaseDirectory);
+}
 
 builder.Services.AddDbContext<DataBaseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("dbContext")));

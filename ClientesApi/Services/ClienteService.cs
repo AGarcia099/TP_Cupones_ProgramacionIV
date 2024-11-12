@@ -17,7 +17,8 @@ namespace ClientesApi.Services
         {
             _context = dataBaseContext;
         }
-
+        //5000
+        //7024
         public async Task<string> SolicitarCupon(ClienteDto clienteDto)
         {
             try

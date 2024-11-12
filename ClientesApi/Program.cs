@@ -13,6 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<DataBaseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("dbContext")));
 
+//Establecer el puerto que fue especificado en appsettings.json
+var puertoApi = builder.Configuration.GetValue<int>("Configuracion:PuertoApi");
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenAnyIP(puertoApi);
+//});
+
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
