@@ -29,14 +29,12 @@ namespace CuponesApiTp.Controllers
             {
                 var categorias = await _context
                     .Categorias
-                    .Include(c => c.Cupones_Categorias)
+                    .Include(c => c.Cupones_Categorias)!
                         .ThenInclude(cc => cc.Cupon)
                     .ToListAsync();
 
                 if (categorias.Count == 0)
-                {
                     return NotFound("No existe ninguna categoría.");
-                }
 
                 return Ok(categorias);
             }
@@ -47,25 +45,25 @@ namespace CuponesApiTp.Controllers
         }
 
         // GET: api/Categorias/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CategoriaModel>> GetCategoriaModel(int id)
-        {
-            try
-            {
-                var categoriaModel = await _context.Categorias.FindAsync(id);
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<CategoriaModel>> GetCategoriaModel(int id)
+        //{
+        //    try
+        //    {
+        //        var categoriaModel = await _context.Categorias.FindAsync(id);
 
-                if (categoriaModel == null)
-                {
-                    return NotFound($"No existe ninguna categoria con el id {id}");
-                }
+        //        if (categoriaModel == null)
+        //        {
+        //            return NotFound($"No existe ninguna categoria con el id {id}");
+        //        }
 
-                return categoriaModel;
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Hubo un problema. Error: {ex.Message}");
-            }
-        }
+        //        return categoriaModel;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Hubo un problema. Error: {ex.Message}");
+        //    }
+        //}
 
         // PUT: api/Categorias/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

@@ -44,25 +44,25 @@ namespace CuponesApiTp.Controllers
         }
 
         // GET: api/Articulos/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ArticuloModel>> GetArticuloModel(int id)
-        {
-            try
-            {
-                var articuloModel = await _context.Articulos.FindAsync(id);
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<ArticuloModel>> GetArticuloModel(int id)
+        //{
+        //    try
+        //    {
+        //        var articuloModel = await _context.Articulos.FindAsync(id);
 
-                if (articuloModel == null)
-                {
-                    return NotFound($"No existe un articulo con el id {id}.");
-                }
+        //        if (articuloModel == null)
+        //        {
+        //            return NotFound($"No existe un articulo con el id {id}.");
+        //        }
 
-                return Ok(articuloModel);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Hubo un problema. Error: {ex.Message}");
-            }
-        }
+        //        return Ok(articuloModel);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Hubo un problema. Error: {ex.Message}");
+        //    }
+        //}
 
         // PUT: api/Articulos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -135,14 +135,19 @@ namespace CuponesApiTp.Controllers
                 if (articuloModel == null)
                     return NotFound($"No existe ningún artículo con el ID {id}.");
 
-                _context.Articulos.Remove(articuloModel);
+                if (!articuloModel.Activo)
+                    return BadRequest("El artículo ya se encuentra inactivo.");
+
+                articuloModel.Activo = false; 
+                _context.Entry(articuloModel).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
 
-                return Ok($"El artículo con ID {id} fue eliminado correctamente.");
+                return Ok($"El artículo con ID {id} fue dado de baja correctamente.");
             }
             catch (Exception ex)
             {
-                return BadRequest($"Hubo un problema al intentar eliminar el artículo. Error: {ex.Message}");
+                return BadRequest($"Hubo un problema al intentar dar de baja el artículo. Error: {ex.Message}");
             }
         }
 

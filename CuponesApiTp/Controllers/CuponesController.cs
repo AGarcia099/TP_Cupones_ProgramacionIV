@@ -29,7 +29,7 @@ namespace CuponesApiTp.Controllers
             {
                 var cupones =  await _context
                     .Cupones
-                    .Include(c => c.Cupones_Categorias)
+                    .Include(c => c.Cupones_Categorias)!
                         .ThenInclude(cc => cc.Categoria)
                     .Include(c => c.Tipo_Cupon)
                     .ToListAsync();
@@ -45,42 +45,66 @@ namespace CuponesApiTp.Controllers
             }
         }
 
+        // GET: api/Cupones/Cliente/{codCliente}
+        [HttpGet("Cliente/{codCliente}")]
+        public async Task<ActionResult<IEnumerable<CuponModel>>> GetCuponesPorCliente(string codCliente)
+        {
+            try
+            {
+                var cupones = await _context.Cupones
+                    .Where(c => _context.Cupones_Clientes.Any(cc => cc.CodCliente == codCliente && cc.Id_Cupon == c.Id_Cupon))
+                    .Include(c => c.Cupones_Categorias)!
+                        .ThenInclude(cc => cc.Categoria)
+                    .Include(c => c.Tipo_Cupon)
+                    .ToListAsync();
+
+                if (cupones == null || !cupones.Any())
+                    return NotFound($"No se encontraron cupones asociados con el código de cliente '{codCliente}'.");
+
+                return Ok(cupones);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Ocurrió un error al obtener los cupones para el cliente con código '{codCliente}': {ex.Message}");
+            }
+        }
+
         // GET: api/Cupones/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CuponModel>> GetCuponModel(int id)
+        [HttpGet("{id_Cupon}")]
+        public async Task<ActionResult<CuponModel>> GetCuponModel(int id_Cupon)
         {
             try
             {
                 var cuponModel = await _context.Cupones
-                    .Include(c => c.Cupones_Categorias)
+                    .Include(c => c.Cupones_Categorias)!
                         .ThenInclude(cc => cc.Categoria)
                     .Include(c => c.Tipo_Cupon)
-                    .FirstOrDefaultAsync(c => c.Id_Cupon == id);
+                    .FirstOrDefaultAsync(c => c.Id_Cupon == id_Cupon);
 
                 if (cuponModel == null)
-                    return NotFound($"No existe un cupon con el Id_Cupon '{id}'.");
+                    return NotFound($"No existe un cupon con el Id_Cupon '{id_Cupon}'.");
 
                 return Ok(cuponModel);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Ocurrió un error al obtener el cupon con Id_Cupon {id}: {ex.Message}");
+                return BadRequest($"Ocurrió un error al obtener el cupon con Id_Cupon {id_Cupon}: {ex.Message}");
             }
         }
 
         // PUT: api/Cupones/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCuponModel(int id, CuponModel cuponModel)
+        [HttpPut("{id_Cupon}")]
+        public async Task<IActionResult> PutCuponModel(int id_Cupon, CuponModel cuponModel)
         {
-            if (id != cuponModel.Id_Cupon)
+            if (id_Cupon != cuponModel.Id_Cupon)
             {
-                return BadRequest($"El ID {id} no coincide");
+                return BadRequest($"El ID {id_Cupon} no coincide");
             }
 
-            if (!CuponModelExists(id))
+            if (!CuponModelExists(id_Cupon))
             {
-                return NotFound($"El cupon con Id_Cupon '{id}' no existe");
+                return NotFound($"El cupon con Id_Cupon '{id_Cupon}' no existe");
             }
 
             _context.Entry(cuponModel).State = EntityState.Modified;
@@ -88,11 +112,11 @@ namespace CuponesApiTp.Controllers
             try
             {
                 await _context.SaveChangesAsync();
-                return Ok($"El cupon con Id_Cupon '{id}' ha sido actualizado exitosamente");
+                return Ok($"El cupon con Id_Cupon '{id_Cupon}' ha sido actualizado exitosamente");
             }
             catch (Exception ex)
             {
-                return BadRequest($"Ocurrió un error al intentar actualizar el cupon con Id_Cupon '{id}': {ex.Message}");
+                return BadRequest($"Ocurrió un error al intentar actualizar el cupon con Id_Cupon '{id_Cupon}': {ex.Message}");
             }
         }
 
@@ -122,26 +146,29 @@ namespace CuponesApiTp.Controllers
             
 
         // DELETE: api/Cupones/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCuponModel(int id)
+        [HttpDelete("{id_Cupon}")]
+        public async Task<IActionResult> DeleteCuponModel(int id_Cupon)
         {
             try
             {
-                var cuponModel = await _context.Cupones.FindAsync(id);
+                var cuponModel = await _context.Cupones.FindAsync(id_Cupon);
                 
                 if (cuponModel == null)
-                {
-                    return NotFound($"El cupon con Id_Cupon '{id}' no existe.");
-                }
+                    return NotFound($"El cupon con Id_Cupon '{id_Cupon}' no existe.");
 
-                _context.Cupones.Remove(cuponModel);
+                if (!cuponModel.Activo)
+                    return BadRequest("El cupon ya se encuentra inactivo.");
+
+                cuponModel.Activo = false;
+                _context.Entry(cuponModel).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
 
-                return Ok($"El cupon con Id_Cupon '{id}' se elimino exitosamente.");
+                return Ok($"El cupon con Id_Cupon '{id_Cupon}' se dio de baja exitosamente.");
             }
             catch(Exception ex)
             {
-                return BadRequest($"Ocurrió un error al intentar eliminar el cupon con Id_Cupon '{id}': {ex.Message}");
+                return BadRequest($"Ocurrió un error al intentar dar de baja el cupon con Id_Cupon '{id_Cupon}': {ex.Message}");
             }
         }
 

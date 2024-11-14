@@ -12,6 +12,6 @@ namespace CuponesApiTp.Models
         public decimal Precio { get; set; }
 
         [ForeignKey("Id_Articulo")]
-        public virtual ArticuloModel Articulo { get; set; }
+        public virtual ArticuloModel? Articulo { get; set; }
     }
 }
