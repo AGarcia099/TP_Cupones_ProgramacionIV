@@ -46,6 +46,33 @@ namespace ClientesApi.Services
             }
         }
 
+        public async Task<string> QuemadoCupon(string nroCupon)
+        {
+            try
+            {
+                var jsonPayload = JsonConvert.SerializeObject(new { NroCupon = nroCupon });
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                using var httpClient = new HttpClient();
+
+                var response = await httpClient.PostAsync("https://localhost:7024/api/SolicitudCupones/QuemadoCupon", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Error al usar el cupón: {error}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error en CuponService: {ex.Message}");
+            }
+        }
+
         public async Task<ClienteModel> CrearCliente(ClienteModel clienteModel)
         {
             _context.Clientes.Add(clienteModel);

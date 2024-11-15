@@ -66,18 +66,16 @@ namespace CuponesApiTp.Controllers
         {
             try
             {
-                // Validar que el número de cupón no esté vacío
                 if (string.IsNullOrEmpty(quemarCuponDto.NroCupon))
                     throw new Exception("El número de cupón no puede estar vacío");
 
-                // Buscar el cupón en Cupones_Clientes
                 var cuponCliente = await _context.Cupones_Clientes
                     .FirstOrDefaultAsync(c => c.NroCupon == quemarCuponDto.NroCupon);
 
                 if (cuponCliente == null)
                     throw new Exception("El cupón no existe o ya ha sido utilizado");
 
-                // Insertar registro en Cupones_Historial
+
                 var historialRegistro = new Cupones_HistorialModel
                 {
                     NroCupon = cuponCliente.NroCupon,
@@ -88,15 +86,20 @@ namespace CuponesApiTp.Controllers
 
                 _context.Cupones_Historial.Add(historialRegistro);
 
-                // Eliminar el registro de Cupones_Clientes
+
                 _context.Cupones_Clientes.Remove(cuponCliente);
 
                 await _context.SaveChangesAsync();
 
-                // Preparar el envío de notificación por correo electrónico
+                var clienteDto = new ClienteDto
+                {
+                    Email = "programacioniv.agus@gmail.com",
+                    CodCliente = cuponCliente.CodCliente
+                };
+
                 var subject = "Número de cupón utilizado";
                 var messageBody = $"Ha utilizado el cupón: {quemarCuponDto.NroCupon}.";
-                await _sendEmailService.EnviarEmailCliente(cuponCliente.CodCliente, quemarCuponDto.NroCupon, subject, messageBody);
+                await _sendEmailService.EnviarEmailCliente(clienteDto.Email, quemarCuponDto.NroCupon, subject, messageBody);
 
                 return Ok(new { Mensaje = "El cupón fue utilizado correctamente." });
             }
