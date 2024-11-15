@@ -136,7 +136,7 @@ namespace CuponesApiTp.Controllers
                 _context.Cupones.Add(cuponModel);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetCuponModel", new { id = cuponModel.Id_Cupon }, cuponModel);
+                return Ok($"El cupon '{cuponModel.Id_Cupon}' fue creado exitosamente");
             }
             catch (Exception ex)
             {

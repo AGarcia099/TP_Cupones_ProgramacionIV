@@ -13,9 +13,5 @@ namespace CuponesApiTp.Models
         public bool Activo { get; set; }
 
         public virtual PrecioModel? Precio { get; set; }
-
-        public int Id_Categoria { get; set; }
-        [ForeignKey("Id_Categoria")]
-        public virtual CategoriaModel? Categoria { get; set; }
     }
 }

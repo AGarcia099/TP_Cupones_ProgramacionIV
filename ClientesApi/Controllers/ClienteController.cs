@@ -17,13 +17,27 @@ namespace ClientesApi.Controllers
             _clienteService = clienteService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> EnviarSolicitudACupones([FromBody] ClienteDto clienteDto)
+        [HttpPost("ReclamarCupon")]
+        public async Task<IActionResult> ReclamarCupon([FromBody] ClienteDto clienteDto)
         {
             try
             {
                 var respuesta = await _clienteService.SolicitarCupon(clienteDto);
                 return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("UsarCupon")]
+        public async Task<IActionResult> UsarCupon([FromBody] string nroCupon)
+        {
+            try
+            {
+                var resultado = await _clienteService.QuemadoCupon(nroCupon);
+                return Ok(new { Mensaje = resultado });
             }
             catch (Exception ex)
             {
