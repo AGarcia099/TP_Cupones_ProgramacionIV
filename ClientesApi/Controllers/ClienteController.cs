@@ -122,5 +122,23 @@ namespace ClientesApi.Controllers
                 return BadRequest($"Error: {ex.Message}");
             }
         }
+
+        [HttpGet("ObtenerCuponesActivos/{codCliente}")]
+        public async Task<IActionResult> ObtenerCuponesActivos(string codCliente)
+        {
+            try
+            {
+                var cupones = await _clienteService.ObtenerCuponesActivos(codCliente);
+
+                if(cupones == null || !cupones.Any())
+                    return NotFound($"No se encontraron cupones activos para el cliente con código: {codCliente}");
+
+                return Ok(cupones);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error al obtener cupones: {ex.Message}");
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@ using ClientesApi.Models;
 using ClientesApi.Models.DTO;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Net.Http;
 using System.Text;
 
 
@@ -95,6 +96,31 @@ namespace ClientesApi.Services
         public async Task<ClienteModel> ObtenerClientePorCodCliente(string codCliente)
         {
             return await _context.Clientes.FindAsync(codCliente); // Buscar cliente por CodCliente
+        }
+
+        public async Task<IEnumerable<CuponDto>> ObtenerCuponesActivos(string codCliente)
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var response = await httpClient.GetAsync($"https://localhost:7024/api/Cupones/Cliente/{codCliente}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var cupones = await response.Content.ReadFromJsonAsync<IEnumerable<CuponDto>>();
+                        return cupones ?? new List<CuponDto>();
+                    }
+                    else
+                    {
+                        throw new Exception($"Error al obtener cupones: {response.ReasonPhrase}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocurrió un error al obtener los cupones activos: {ex.Message}");
+            }
         }
     }
 }

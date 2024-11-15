@@ -11,5 +11,6 @@ namespace ClientesApi.Interfaces
         Task<ClienteModel> ModificarCliente(ClienteModel clienteModel);
         Task<List<ClienteModel>> ObtenerTodosLosClientes();
         Task<ClienteModel> ObtenerClientePorCodCliente(string codCliente);
+        Task<IEnumerable<CuponDto>> ObtenerCuponesActivos(string codCliente);
     }
 }

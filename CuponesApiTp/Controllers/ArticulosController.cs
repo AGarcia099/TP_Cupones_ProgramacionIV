@@ -116,6 +116,15 @@ namespace CuponesApiTp.Controllers
                 _context.Articulos.Add(articuloModel);
                 await _context.SaveChangesAsync();
 
+                PrecioModel nuevoPrecio = new PrecioModel
+                {
+                    Id_Articulo = articuloModel.Id_Articulo,
+                    Precio = 0
+                };
+
+                _context.Precios.Add(nuevoPrecio);
+                await _context.SaveChangesAsync();
+
                 return Ok($"El artículo '{articuloModel.Nombre_Articulo}' fue creado exitosamente.");
             }
             catch (Exception ex)

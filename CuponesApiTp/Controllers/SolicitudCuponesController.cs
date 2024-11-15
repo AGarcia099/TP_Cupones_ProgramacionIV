@@ -93,15 +93,10 @@ namespace CuponesApiTp.Controllers
 
                 await _context.SaveChangesAsync();
 
-                var clienteDto = new ClienteDto
-                {
-                    Email = "programacioniv.agus@gmail.com",
-                    CodCliente = cuponCliente.CodCliente
-                };
-
-                var subject = "Numero de cupon usado";
-                var messageBody = $"Ha usado el cupon: {quemarCuponDto.NroCupon}.";
-                await _sendEmailService.EnviarEmailCliente(clienteDto.Email, quemarCuponDto.NroCupon, subject, messageBody);
+                // Preparar el envío de notificación por correo electrónico
+                var subject = "Número de cupón utilizado";
+                var messageBody = $"Ha utilizado el cupón: {quemarCuponDto.NroCupon}.";
+                await _sendEmailService.EnviarEmailCliente(cuponCliente.CodCliente, quemarCuponDto.NroCupon, subject, messageBody);
 
                 return Ok(new { Mensaje = "El cupón fue utilizado correctamente." });
             }
