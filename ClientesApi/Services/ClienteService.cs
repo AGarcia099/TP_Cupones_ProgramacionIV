@@ -54,7 +54,7 @@ namespace ClientesApi.Services
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
                 using var httpClient = new HttpClient();
-                var response = await httpClient.PostAsync("https://localhost:7024/api/SolicitudCupones/QuemarCupon", content);
+                var response = await httpClient.PostAsync("https://localhost:7024/api/SolicitudCupones/QuemadoCupon", content);
 
                 if (response.IsSuccessStatusCode)
                 {

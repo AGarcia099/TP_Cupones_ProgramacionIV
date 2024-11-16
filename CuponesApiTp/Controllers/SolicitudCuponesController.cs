@@ -61,8 +61,8 @@ namespace CuponesApiTp.Controllers
             }
         }
 
-        [HttpPost("QuemarCupon")]
-        public async Task<IActionResult> QuemarCupon([FromBody] QuemarCuponDto quemarCuponDto)
+        [HttpPost("QuemadoCupon")]
+        public async Task<IActionResult> QuemadoCupon([FromBody] QuemarCuponDto quemarCuponDto)
         {
             try
             {
