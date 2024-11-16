@@ -1,4 +1,4 @@
-﻿namespace CuponesApiTp.Models.DTO
+﻿namespace ClientesApi.Models.DTO
 {
     public class QuemarCuponDto
     {

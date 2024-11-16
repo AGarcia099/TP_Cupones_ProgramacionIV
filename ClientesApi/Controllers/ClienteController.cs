@@ -32,11 +32,11 @@ namespace ClientesApi.Controllers
         }
 
         [HttpPost("UsarCupon")]
-        public async Task<IActionResult> UsarCupon([FromBody] string nroCupon)
+        public async Task<IActionResult> UsarCupon([FromBody] QuemarCuponDto quemarCuponDto)
         {
             try
             {
-                var resultado = await _clienteService.QuemadoCupon(nroCupon);
+                var resultado = await _clienteService.QuemadoCupon(quemarCuponDto);
                 return Ok(new { Mensaje = resultado });
             }
             catch (Exception ex)

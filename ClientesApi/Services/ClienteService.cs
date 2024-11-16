@@ -2,6 +2,7 @@
 using ClientesApi.Interfaces;
 using ClientesApi.Models;
 using ClientesApi.Models.DTO;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Net.Http;
@@ -45,17 +46,15 @@ namespace ClientesApi.Services
                 throw new Exception($"Error: {ex.Message}");
             }
         }
-
-        public async Task<string> QuemadoCupon(string nroCupon)
+        public async Task<string> QuemadoCupon(QuemarCuponDto quemarCuponDto)
         {
             try
             {
-                var jsonPayload = JsonConvert.SerializeObject(new { NroCupon = nroCupon });
+                var jsonPayload = JsonConvert.SerializeObject(quemarCuponDto);
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
                 using var httpClient = new HttpClient();
-
-                var response = await httpClient.PostAsync("https://localhost:7024/api/SolicitudCupones/QuemadoCupon", content);
+                var response = await httpClient.PostAsync("https://localhost:7024/api/SolicitudCupones/QuemarCupon", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -64,12 +63,12 @@ namespace ClientesApi.Services
                 else
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al usar el cupón: {error}");
+                    throw new Exception($"{error}");
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error en CuponService: {ex.Message}");
+                throw new Exception($"Error: {ex.Message}");
             }
         }
 
