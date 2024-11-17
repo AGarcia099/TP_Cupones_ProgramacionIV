@@ -3,6 +3,7 @@ using ClientesApi.Interfaces;
 using ClientesApi.Models;
 using ClientesApi.Models.DTO;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Net.Http;

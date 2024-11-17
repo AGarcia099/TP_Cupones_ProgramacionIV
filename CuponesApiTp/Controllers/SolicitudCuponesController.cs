@@ -32,6 +32,11 @@ namespace CuponesApiTp.Controllers
                 if (clienteDto.CodCliente.IsNullOrEmpty())
                     throw new Exception("El CodCliente no puede estar vacio");
 
+                var clienteExistenteResponse = await VerificarClienteExistente(clienteDto.CodCliente);
+
+                if (!clienteExistenteResponse.IsSuccessStatusCode)
+                    throw new Exception("No existe un cliente con el CodCliente proporcionado");
+
                 string nroCupon = await _cuponesServices.GenerarNroCupon();
 
                 Cupon_ClienteModel cupon_Cliente = new Cupon_ClienteModel()
@@ -99,6 +104,16 @@ namespace CuponesApiTp.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+        private async Task<HttpResponseMessage> VerificarClienteExistente(string codCliente)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://localhost:7107/api/Cliente/"); 
+                var response = await client.GetAsync($"verificarCliente/{codCliente}"); 
+                return response;
             }
         }
     }

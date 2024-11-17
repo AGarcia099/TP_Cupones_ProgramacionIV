@@ -1,8 +1,10 @@
-﻿using ClientesApi.Interfaces;
+﻿using ClientesApi.Data;
+using ClientesApi.Interfaces;
 using ClientesApi.Models;
 using ClientesApi.Models.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClientesApi.Controllers
 {
@@ -11,10 +13,27 @@ namespace ClientesApi.Controllers
     public class ClienteController : ControllerBase
     {
         private readonly IClienteService _clienteService;
+        private readonly DataBaseContext _context;
 
-        public ClienteController(IClienteService clienteService)
+        public ClienteController(IClienteService clienteService, DataBaseContext dataBaseContext)
         {
             _clienteService = clienteService;
+            _context = dataBaseContext;
+        }
+
+        [HttpGet("verificarCliente/{codCliente}")]
+        [ApiExplorerSettings(IgnoreApi = true)]  // Ignora este endpoint en Swagger
+        public async Task<IActionResult> VerificarCliente(string codCliente)
+        {
+            var cliente = await _context.Clientes
+                .FirstOrDefaultAsync(c => c.CodCliente == codCliente);
+
+            if (cliente == null)
+            {
+                return NotFound(new { Mensaje = "Cliente no encontrado" });
+            }
+
+            return Ok(new { Mensaje = "Cliente encontrado" });
         }
 
         [HttpPost("ReclamarCupon")]
