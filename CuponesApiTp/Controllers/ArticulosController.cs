@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using CuponesApiTp.Data;
 using CuponesApiTp.Models;
 using Microsoft.AspNetCore.SignalR;
+using Serilog;
 
 namespace CuponesApiTp.Controllers
 {
@@ -32,13 +33,16 @@ namespace CuponesApiTp.Controllers
 
                 if (articulos.Count == 0)
                 {
+                    Log.Error("No existen Articulos");
                     return NotFound("No hay articulos");
                 }
 
+                Log.Information("Se llamo al endpoint GetArticulos");
                 return Ok(articulos);
             }
             catch (Exception ex)
             {
+                Log.Error($"Hubo un problema en GetArticulos. error: {ex.Message}");
                 return BadRequest($"Hubo un problema. Error: {ex.Message}");
             }
         }
@@ -71,6 +75,7 @@ namespace CuponesApiTp.Controllers
         {
             if (id != articuloModel.Id_Articulo)
             {
+                Log.Error($"No existe el articulo con id '{id}' ");
                 return BadRequest("El ID proporcionado no coincide con el ID del artículo.");
             }
 
@@ -79,19 +84,15 @@ namespace CuponesApiTp.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                Log.Information("Se llamo al endpoint de PutArticulo");
+                return Ok("Se modificaron los datos del articulo correctamente.");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!ArticuloModelExists(id))
-                {
-                    return NotFound($"El ID {id} no existe.");
-                }
-                else
-                {
-                    throw;
-                }
+                Log.Error($"Hubo un problema en PutArticulo. Error: {ex.Message}");
+                return BadRequest($"Hubo un problema. Error: {ex.Message}");
             }
-            return Ok("Se modificaron los datos del articulo correctamente.");
         }
 
         // POST: api/Articulos
@@ -103,15 +104,24 @@ namespace CuponesApiTp.Controllers
             {
 
                 if (string.IsNullOrEmpty(articuloModel.Nombre_Articulo))
+                {
+                    Log.Error("El nombre del articulo es necesario");
                     return BadRequest("El nombre del artículo es obligatorio.");
+                }
 
                 if (string.IsNullOrEmpty(articuloModel.Descripcion_Articulo))
+                {
+                    Log.Error("La descripcion del articulo es necesaria");
                     return BadRequest("La descripción del artículo es obligatoria.");
+                }
 
                 var articuloExistente = await _context.Articulos
                     .FirstOrDefaultAsync(a => a.Nombre_Articulo == articuloModel.Nombre_Articulo);
                 if (articuloExistente != null)
+                {
+                    Log.Error("Nombre de articulo repetido");
                     return BadRequest($"Ya existe un artículo con el nombre '{articuloModel.Nombre_Articulo}'.");
+                }
 
                 _context.Articulos.Add(articuloModel);
                 await _context.SaveChangesAsync();
@@ -125,10 +135,12 @@ namespace CuponesApiTp.Controllers
                 _context.Precios.Add(nuevoPrecio);
                 await _context.SaveChangesAsync();
 
+                Log.Information("Se llamo al endpoint POST de Articulos");
                 return Ok($"El artículo '{articuloModel.Nombre_Articulo}' fue creado exitosamente.");
             }
             catch (Exception ex)
             {
+                Log.Error($"Hubo un problema en PostArticulo. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema. Error: {ex.Message}");
             }
         }
@@ -142,27 +154,30 @@ namespace CuponesApiTp.Controllers
                 var articuloModel = await _context.Articulos.FindAsync(id);
 
                 if (articuloModel == null)
+                {
+                    Log.Error($"El articulo con ID {id} no existe");
                     return NotFound($"No existe ningún artículo con el ID {id}.");
+                }
 
                 if (!articuloModel.Activo)
+                {
+                    Log.Error("El articulo ya se encuentra inactivo");
                     return BadRequest("El artículo ya se encuentra inactivo.");
+                }
 
                 articuloModel.Activo = false; 
                 _context.Entry(articuloModel).State = EntityState.Modified;
 
                 await _context.SaveChangesAsync();
 
+                Log.Information("El articulo fue dado de baja");
                 return Ok($"El artículo con ID {id} fue dado de baja correctamente.");
             }
             catch (Exception ex)
             {
+                Log.Error($"Hubo un problema en el endpoint DeleteArticulo. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema al intentar dar de baja el artículo. Error: {ex.Message}");
             }
-        }
-
-        private bool ArticuloModelExists(int id)
-        {
-            return _context.Articulos.Any(e => e.Id_Articulo == id);
         }
     }
 }

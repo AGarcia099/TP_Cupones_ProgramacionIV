@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CuponesApiTp.Data;
 using CuponesApiTp.Models;
+using Serilog;
 
 namespace CuponesApiTp.Controllers
 {
@@ -34,12 +35,17 @@ namespace CuponesApiTp.Controllers
                     .ToListAsync();
 
                 if (categorias.Count == 0)
+                {
+                    Log.Error("No hay categorias");
                     return NotFound("No existe ninguna categoría.");
+                }
 
+                Log.Information("Se llamo al endpoint GetCategorias");
                 return Ok(categorias);
             }
             catch (Exception ex)
             {
+                Log.Error($"Hub un problema en el endpoint GetCategorias. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema al obtener las categorías. Error: {ex.Message}");
             }
         }
@@ -72,6 +78,7 @@ namespace CuponesApiTp.Controllers
         {
             if (id != categoriaModel.Id_Categoria)
             {
+                Log.Error("El id ingresado no existe");
                 return BadRequest("El ID proporcionado no coincide con el de la categoría que intenta actualizar.");
             }
 
@@ -81,18 +88,13 @@ namespace CuponesApiTp.Controllers
             {
                 await _context.SaveChangesAsync();
 
+                Log.Information("Se llamo al endpoint PutCategoria");
                 return Ok($"Los datos de la categoria con id {id} fueron modificados correctamente");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!CategoriaModelExists(id))
-                {
-                    return NotFound($"No existe una categoria con el id {id}");
-                }
-                else
-                {
-                    throw;
-                }
+                Log.Error($"Hubo un problema en PutCategoria. Error {ex.Message}");
+                return BadRequest($"Hubo un problema. Error: {ex.Message}");
             }
         }
 
@@ -102,7 +104,10 @@ namespace CuponesApiTp.Controllers
         public async Task<ActionResult<CategoriaModel>> PostCategoriaModel(CategoriaModel categoriaModel)
         {
             if (string.IsNullOrEmpty(categoriaModel.Nombre))
+            {
+                Log.Error("Debe ingresar el nombre de la categoria");
                 return BadRequest("El nombre de la categoría es obligatorio.");
+            }
 
             try
             {
@@ -111,16 +116,19 @@ namespace CuponesApiTp.Controllers
 
                 if (categoriaExistente != null)
                 {
+                    Log.Error("No puede ingresar un nombre de categoria existente");
                     return BadRequest($"La categoria con el nombre '{categoriaModel.Nombre}' ya existe.");
                 }
 
                 _context.Categorias.Add(categoriaModel);
                 await _context.SaveChangesAsync();
 
+                Log.Information("Se llamo al endpoint PostCategoria");
                 return Ok($"La categoria '{categoriaModel.Nombre}' fue creada con exito");
             }
             catch (Exception ex)
             {
+                Log.Error($"Hubo un problema en PostCategoria. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema al crear la categoria. Error: {ex.Message}");
             }
         }
@@ -134,23 +142,21 @@ namespace CuponesApiTp.Controllers
                 var categoriaModel = await _context.Categorias.FindAsync(id);
                 if (categoriaModel == null)
                 {
+                    Log.Error("El id de categoria ingresado no existe");
                     return NotFound($"No existe una categoria con el id {id}.");
                 }
 
                 _context.Categorias.Remove(categoriaModel);
                 await _context.SaveChangesAsync();
 
+                Log.Information("Se llamo al endpoint DeleteCategoria");
                 return Ok($"La categoria con id {id} fue borrada exitosamente.");
             }
             catch (Exception ex)
             {
+                Log.Error($"Hubo un problema en DeleteCategoria. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema al eliminar la categoria. Error: {ex.Message}");
             }
-        }
-
-        private bool CategoriaModelExists(int id)
-        {
-            return _context.Categorias.Any(e => e.Id_Categoria == id);
         }
     }
 }
