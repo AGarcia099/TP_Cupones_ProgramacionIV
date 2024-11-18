@@ -30,6 +30,7 @@ namespace CuponesApiTp.Controllers
             {
                 var cupones =  await _context
                     .Cupones
+                    .Where(c => c.Activo)
                     .Include(c => c.Cupones_Categorias)!
                         .ThenInclude(cc => cc.Categoria)
                     .Include(c => c.Tipo_Cupon)
@@ -37,8 +38,8 @@ namespace CuponesApiTp.Controllers
 
                 if(cupones == null || !cupones.Any())
                 {
-                    Log.Error("No hay registros de Cupones");
-                    return NotFound("No hay cupones");
+                    Log.Error("No hay registros de Cupones activos");
+                    return NotFound("No hay cupones activos");
                 }
 
                 Log.Information("Se llamo al endpoint GetCupones");
@@ -97,12 +98,12 @@ namespace CuponesApiTp.Controllers
                     .Include(c => c.Cupones_Categorias)!
                         .ThenInclude(cc => cc.Categoria)
                     .Include(c => c.Tipo_Cupon)
-                    .FirstOrDefaultAsync(c => c.Id_Cupon == id_Cupon);
+                    .FirstOrDefaultAsync(c => c.Id_Cupon == id_Cupon && c.Activo);
 
                 if (cuponModel == null)
                 {
-                    Log.Error("No hay cupon con ese Id_Cupon");
-                    return NotFound($"No existe un cupon con el Id_Cupon '{id_Cupon}'.");
+                    Log.Error($"No hay cupon activo con el Id_Cupon '{id_Cupon}'");
+                    return NotFound($"No existe un cupon activo con el Id_Cupon '{id_Cupon}'.");
                 }
 
                 Log.Information("Se llamo al endpoint GetCupon por Id_Cupon");
