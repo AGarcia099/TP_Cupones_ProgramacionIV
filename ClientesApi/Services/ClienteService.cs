@@ -33,20 +33,34 @@ namespace ClientesApi.Services
 
                 if (respuesta.IsSuccessStatusCode)
                 {
-                    var mensaje = await respuesta.Content.ReadAsStringAsync();
-                    return mensaje;
+                    return await respuesta.Content.ReadAsStringAsync();
                 }
-                else
+
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
                     var error = await respuesta.Content.ReadAsStringAsync();
-                    throw new Exception($"{error}");
+                    throw new ArgumentException($"Solicitud inválida: {error}");
                 }
+
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    throw new KeyNotFoundException("El cliente o el cupon no fueron encontrados.");
+                }
+
+                throw new HttpRequestException($"Error al procesar la solicitud: {respuesta.ReasonPhrase}.");
             }
+
+            catch (Exception ex) when (ex is ArgumentException || ex is KeyNotFoundException || ex is HttpRequestException)
+            {
+                throw;
+            }
+
             catch (Exception ex)
             {
-                throw new Exception($"Error: {ex.Message}");
+                throw new Exception($"Error en el servicio de solicitud de cupones: {ex.Message}", ex);
             }
         }
+
         public async Task<string> QuemadoCupon(QuemarCuponDto quemarCuponDto)
         {
             try
@@ -64,12 +78,12 @@ namespace ClientesApi.Services
                 else
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"{error}");
+                    throw new Exception($"Error al utilizar el cupon: {error}");
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error: {ex.Message}");
+                throw new Exception($"Error en la solicitud para quemar el cupón: {ex.Message}", ex);
             }
         }
 
@@ -127,26 +141,22 @@ namespace ClientesApi.Services
 
         public async Task<IEnumerable<CuponDto>> ObtenerCuponesActivos(string codCliente)
         {
-            try
+            using (var httpClient = new HttpClient())
             {
-                using (var httpClient = new HttpClient())
-                {
-                    var response = await httpClient.GetAsync($"https://localhost:7024/api/Cupones/Cliente/{codCliente}");
+                var response = await httpClient.GetAsync($"https://localhost:7024/api/Cupones/Cliente/{codCliente}");
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var cupones = await response.Content.ReadFromJsonAsync<IEnumerable<CuponDto>>();
-                        return cupones ?? new List<CuponDto>();
-                    }
-                    else
-                    {
-                        throw new Exception($"Error al obtener cupones: {response.ReasonPhrase}");
-                    }
+                if (response.IsSuccessStatusCode)
+                {
+                    var cupones = await response.Content.ReadFromJsonAsync<IEnumerable<CuponDto>>();
+                    return cupones ?? new List<CuponDto>();
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ocurrió un error al obtener los cupones activos: {ex.Message}");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    throw new KeyNotFoundException($"No se encontraron cupones para el cliente con código: {codCliente}.");
+                }
+
+                throw new HttpRequestException($"Error al llamar al servicio externo: {response.ReasonPhrase}.");
             }
         }
     }

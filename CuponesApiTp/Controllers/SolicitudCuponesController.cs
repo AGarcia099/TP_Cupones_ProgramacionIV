@@ -103,7 +103,7 @@ namespace CuponesApiTp.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return BadRequest(new { error = ex.Message});
             }
         }
 

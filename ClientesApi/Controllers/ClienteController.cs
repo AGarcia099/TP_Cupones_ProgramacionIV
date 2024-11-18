@@ -44,9 +44,21 @@ namespace ClientesApi.Controllers
                 var respuesta = await _clienteService.SolicitarCupon(clienteDto);
                 return Ok(respuesta);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status502BadGateway, new { error = ex.Message });
+            }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Ocurrió un error inesperado.", detalle = ex.Message });
             }
         }
 
@@ -56,11 +68,11 @@ namespace ClientesApi.Controllers
             try
             {
                 var resultado = await _clienteService.QuemadoCupon(quemarCuponDto);
-                return Ok(new { Mensaje = resultado });
+                return Ok(resultado);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return BadRequest(new { error = ex.Message});
             }
         }
 
@@ -168,9 +180,17 @@ namespace ClientesApi.Controllers
 
                 return Ok(cupones);
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status502BadGateway, $"Problema al comunicarse con el servicio: {ex.Message}");
+            }
             catch (Exception ex)
             {
-                return BadRequest($"Error al obtener cupones: {ex.Message}");
+                return BadRequest($"Error inesperado: {ex.Message}");
             }
         }
     }

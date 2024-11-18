@@ -57,12 +57,19 @@ namespace CuponesApiTp.Controllers
         {
             try
             {
+                var fechaActual = DateTime.Now;
+
                 var cupones = await _context.Cupones
-                    .Where(c => _context.Cupones_Clientes.Any(cc => cc.CodCliente == codCliente && cc.Id_Cupon == c.Id_Cupon))
-                    .Include(c => c.Cupones_Categorias)!
-                        .ThenInclude(cc => cc.Categoria)
-                    .Include(c => c.Tipo_Cupon)
-                    .ToListAsync();
+                    .Where(c =>
+                       _context.Cupones_Clientes.Any(cc => cc.CodCliente == codCliente && cc.Id_Cupon == c.Id_Cupon) &&
+                       c.Activo == true &&
+                       c.FechaInicio <= fechaActual &&
+                       c.FechaFin >= fechaActual
+                    )
+                   .Include(c => c.Cupones_Categorias)!
+                       .ThenInclude(cc => cc.Categoria)
+                   .Include(c => c.Tipo_Cupon)
+                   .ToListAsync();
 
                 if (cupones == null || !cupones.Any())
                 {
