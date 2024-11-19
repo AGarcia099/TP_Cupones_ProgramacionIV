@@ -25,6 +25,7 @@ namespace CuponesApiTp.Controllers
         }
 
         [HttpPost("SolicitarCupon")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> SolicitarCupon(ClienteDto clienteDto)
         {
             try
@@ -67,6 +68,7 @@ namespace CuponesApiTp.Controllers
         }
 
         [HttpPost("QuemadoCupon")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> QuemadoCupon([FromBody] QuemarCuponDto quemarCuponDto)
         {
             try

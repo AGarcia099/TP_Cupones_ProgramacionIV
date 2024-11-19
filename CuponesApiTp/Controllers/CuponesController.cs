@@ -55,10 +55,10 @@ namespace CuponesApiTp.Controllers
         {
             try
             {
-                // Obtener todos los cupones del cliente sin las restricciones adicionales
+               
                 var cupones = await _context.Cupones_Clientes
                     .Where(cc => cc.CodCliente == codCliente)
-                    .Include(cc => cc.Cupon) // Incluir la entidad Cupon asociada
+                    .Include(cc => cc.Cupon) 
                     .ToListAsync();
 
                 if (cupones == null || !cupones.Any())
