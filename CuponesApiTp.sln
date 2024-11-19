@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuponesApiTp", "CuponesApiTp\CuponesApiTp.csproj", "{E7CC6F7C-9574-47E6-BBCE-59199D37B2DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientesApi", "ClientesApi\ClientesApi.csproj", "{B689D100-FF1C-46D0-A983-7EB3E841694E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientesApi", "ClientesApi\ClientesApi.csproj", "{B689D100-FF1C-46D0-A983-7EB3E841694E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

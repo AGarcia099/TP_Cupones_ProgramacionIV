@@ -75,7 +75,6 @@ namespace CuponesApiTp.Controllers
         }
 
         // PUT: api/Cupon_Cliente/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{nroCupon}")]
         public async Task<IActionResult> PutCupon_ClienteModel(string nroCupon, Cupon_ClienteModel cupon_ClienteModel)
         {
@@ -116,7 +115,6 @@ namespace CuponesApiTp.Controllers
         }
 
         // POST: api/Cupon_Cliente
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Cupon_ClienteModel>> PostCupon_ClienteModel(Cupon_ClienteModel cupon_ClienteModel)
         {

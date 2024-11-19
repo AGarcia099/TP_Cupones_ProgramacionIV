@@ -43,7 +43,6 @@ namespace CuponesApiTp.Controllers
         }
 
         // PUT: api/Tipo_Cupon/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTipo_CuponModel(int id, Tipo_CuponModel tipo_CuponModel)
         {
@@ -74,7 +73,6 @@ namespace CuponesApiTp.Controllers
         }
 
         // POST: api/Tipo_Cupon
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Tipo_CuponModel>> PostTipo_CuponModel(Tipo_CuponModel tipo_CuponModel)
         {

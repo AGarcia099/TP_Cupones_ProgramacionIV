@@ -124,7 +124,6 @@ namespace CuponesApiTp.Controllers
         }
 
         // PUT: api/Cupones/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id_Cupon}")]
         public async Task<IActionResult> PutCuponModel(int id_Cupon, CuponModel cuponModel)
         {
@@ -157,7 +156,6 @@ namespace CuponesApiTp.Controllers
         }
 
         // POST: api/Cupones
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<CuponModel>> PostCuponModel(CuponModel cuponModel)
         {

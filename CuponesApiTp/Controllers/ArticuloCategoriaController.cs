@@ -17,13 +17,12 @@ namespace CuponesApiTp.Controllers
             _context = context;
         }
 
-        // Endpoint para asignar uno o varios artículos a una categoría
+        
         [HttpPost("AddArticulosToCategoria")]
         public async Task<ActionResult> AddArticulosToCategoria(int idCategoria, [FromBody] List<int> idsArticulos)
         {
             try
             {
-                // Validar si la categoría existe
                 var categoria = await _context.Categorias
                     .FirstOrDefaultAsync(c => c.Id_Categoria == idCategoria);
 
@@ -32,7 +31,7 @@ namespace CuponesApiTp.Controllers
                     return NotFound("La categoría no existe.");
                 }
 
-                // Filtrar los artículos que existen y están activos
+               
                 var articulos = await _context.Articulos
                     .Where(a => idsArticulos.Contains(a.Id_Articulo) && a.Activo)
                     .ToListAsync();
@@ -42,7 +41,6 @@ namespace CuponesApiTp.Controllers
                     return NotFound("No se encontraron artículos válidos para asignar.");
                 }
 
-                // Actualizar la relación de cada artículo con la categoría
                 foreach (var articulo in articulos)
                 {
                     articulo.id_categoria = idCategoria;

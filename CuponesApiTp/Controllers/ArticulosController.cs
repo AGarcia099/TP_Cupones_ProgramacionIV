@@ -47,29 +47,8 @@ namespace CuponesApiTp.Controllers
             }
         }
 
-        // GET: api/Articulos/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<ArticuloModel>> GetArticuloModel(int id)
-        //{
-        //    try
-        //    {
-        //        var articuloModel = await _context.Articulos.FindAsync(id);
-
-        //        if (articuloModel == null)
-        //        {
-        //            return NotFound($"No existe un articulo con el id {id}.");
-        //        }
-
-        //        return Ok(articuloModel);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest($"Hubo un problema. Error: {ex.Message}");
-        //    }
-        //}
 
         // PUT: api/Articulos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutArticuloModel(int id, ArticuloModel articuloModel)
         {

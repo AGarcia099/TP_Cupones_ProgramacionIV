@@ -46,29 +46,7 @@ namespace CuponesApiTp.Controllers
             }
         }
 
-        // GET: api/Categorias/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<CategoriaModel>> GetCategoriaModel(int id)
-        //{
-        //    try
-        //    {
-        //        var categoriaModel = await _context.Categorias.FindAsync(id);
-
-        //        if (categoriaModel == null)
-        //        {
-        //            return NotFound($"No existe ninguna categoria con el id {id}");
-        //        }
-
-        //        return categoriaModel;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest($"Hubo un problema. Error: {ex.Message}");
-        //    }
-        //}
-
         // PUT: api/Categorias/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategoriaModel(int id, CategoriaModel categoriaModel)
         {
@@ -95,7 +73,6 @@ namespace CuponesApiTp.Controllers
         }
 
         // POST: api/Categorias
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<CategoriaModel>> PostCategoriaModel(CategoriaModel categoriaModel)
         {

@@ -89,10 +89,8 @@ namespace CuponesApiTp.Controllers
                     return NotFound($"No se encontró un precio con el ID {id}.");
                 }
 
-                // Actualizar el valor del precio con el valor proporcionado en precioModel
                 precioExistente.Precio = precioModel.Precio;
 
-                // Guardar cambios en la base de datos
                 _context.Precios.Update(precioExistente);
                 await _context.SaveChangesAsync();
 
