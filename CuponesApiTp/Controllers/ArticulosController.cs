@@ -123,6 +123,15 @@ namespace CuponesApiTp.Controllers
                     return BadRequest($"Ya existe un artículo con el nombre '{articuloModel.Nombre_Articulo}'.");
                 }
 
+                var categoriaExistente = await _context.Categorias
+                .FirstOrDefaultAsync(c => c.Id_Categoria == articuloModel.id_categoria);
+
+                if (categoriaExistente == null)
+                {
+                    Log.Error("La categoría especificada no existe");
+                    return NotFound($"La categoría con ID '{articuloModel.id_categoria}' no existe.");
+                }
+
                 _context.Articulos.Add(articuloModel);
                 await _context.SaveChangesAsync();
 
@@ -140,6 +149,8 @@ namespace CuponesApiTp.Controllers
             }
             catch (Exception ex)
             {
+
+
                 Log.Error($"Hubo un problema en PostArticulo. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema. Error: {ex.Message}");
             }

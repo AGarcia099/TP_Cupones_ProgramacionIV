@@ -12,5 +12,6 @@ namespace CuponesApiTp.Models
         public string NroCupon { get; set; }
         public DateTime? FechaAsignado { get; set; }
         public string CodCliente { get; set; }
+        public virtual CuponModel? Cupon { get; set; }
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using CuponesApiTp.Data;
 using CuponesApiTp.Models;
 using Serilog;
+using CuponesApiTp.Services;
+using CuponesApiTp.Interfaces;
 
 namespace CuponesApiTp.Controllers
 {
@@ -16,8 +18,7 @@ namespace CuponesApiTp.Controllers
     public class Cupon_ClienteController : ControllerBase
     {
         private readonly DataBaseContext _context;
-
-        public Cupon_ClienteController(DataBaseContext context)
+        public Cupon_ClienteController(DataBaseContext context )
         {
             _context = context;
         }

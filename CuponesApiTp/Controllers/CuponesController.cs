@@ -31,9 +31,6 @@ namespace CuponesApiTp.Controllers
                 var cupones =  await _context
                     .Cupones
                     .Where(c => c.Activo)
-                    .Include(c => c.Cupones_Categorias)!
-                        .ThenInclude(cc => cc.Categoria)
-                    .Include(c => c.Tipo_Cupon)
                     .ToListAsync();
 
                 if(cupones == null || !cupones.Any())
@@ -58,32 +55,24 @@ namespace CuponesApiTp.Controllers
         {
             try
             {
-                var fechaActual = DateTime.Now;
-
-                var cupones = await _context.Cupones
-                    .Where(c =>
-                       _context.Cupones_Clientes.Any(cc => cc.CodCliente == codCliente && cc.Id_Cupon == c.Id_Cupon) &&
-                       c.Activo == true &&
-                       c.FechaInicio <= fechaActual &&
-                       c.FechaFin >= fechaActual
-                    )
-                   .Include(c => c.Cupones_Categorias)!
-                       .ThenInclude(cc => cc.Categoria)
-                   .Include(c => c.Tipo_Cupon)
-                   .ToListAsync();
+                // Obtener todos los cupones del cliente sin las restricciones adicionales
+                var cupones = await _context.Cupones_Clientes
+                    .Where(cc => cc.CodCliente == codCliente)
+                    .Include(cc => cc.Cupon) // Incluir la entidad Cupon asociada
+                    .ToListAsync();
 
                 if (cupones == null || !cupones.Any())
                 {
-                    Log.Error("No hay cupones con el codigo de cliente ingresado");
+                    Log.Error($"No se encontraron cupones asociados con el código de cliente '{codCliente}'");
                     return NotFound($"No se encontraron cupones asociados con el código de cliente '{codCliente}'.");
                 }
 
-                Log.Information("Se llamo al endpoint GetCuponesPorCliente");
-                return Ok(cupones);
+                Log.Information("Se llamó al endpoint GetCuponesPorCliente");
+                return Ok(cupones.Select(cc => cc.Cupon)); // Retornar solo los cupones
             }
             catch (Exception ex)
             {
-                Log.Error($"Hubo un problema en GetCuponesPorCliente. Error: {ex.Message}");
+                Log.Error($"Hubo un problema al obtener los cupones para el cliente con código '{codCliente}': {ex.Message}");
                 return BadRequest($"Ocurrió un error al obtener los cupones para el cliente con código '{codCliente}': {ex.Message}");
             }
         }

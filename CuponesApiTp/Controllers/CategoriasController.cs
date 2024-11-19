@@ -28,11 +28,7 @@ namespace CuponesApiTp.Controllers
         {
             try
             {
-                var categorias = await _context
-                    .Categorias
-                    .Include(c => c.Cupones_Categorias)!
-                        .ThenInclude(cc => cc.Cupon)
-                    .ToListAsync();
+                var categorias = await _context.Categorias.ToListAsync();
 
                 if (categorias.Count == 0)
                 {
@@ -139,12 +135,24 @@ namespace CuponesApiTp.Controllers
         {
             try
             {
-                var categoriaModel = await _context.Categorias.FindAsync(id);
+                var categoriaModel = await _context.Categorias
+                    .Include(c => c.Articulos)
+                    .FirstOrDefaultAsync(c => c.Id_Categoria == id);
+
                 if (categoriaModel == null)
                 {
                     Log.Error("El id de categoria ingresado no existe");
                     return NotFound($"No existe una categoria con el id {id}.");
                 }
+
+                if (categoriaModel.Articulos != null && categoriaModel.Articulos.Any())
+                {
+                    foreach (var articulo in categoriaModel.Articulos)
+                    {
+                        articulo.id_categoria = null;
+                    }
+                }
+
 
                 _context.Categorias.Remove(categoriaModel);
                 await _context.SaveChangesAsync();
@@ -154,6 +162,7 @@ namespace CuponesApiTp.Controllers
             }
             catch (Exception ex)
             {
+
                 Log.Error($"Hubo un problema en DeleteCategoria. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema al eliminar la categoria. Error: {ex.Message}");
             }

@@ -92,6 +92,10 @@ namespace CuponesApiTp.Controllers
             }
             catch (Exception ex)
             {
+                if (ex.InnerException != null)
+                {
+                    return BadRequest($"Error interno: {ex.InnerException.Message}");
+                }
                 Log.Error($"Hubo un problema en PutCupon_Categoria. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema. Error: {ex.Message}");
             }
@@ -112,6 +116,7 @@ namespace CuponesApiTp.Controllers
             }
             catch (Exception ex)
             {
+
                 Log.Error($"Hubo un problema en PostCupon_Categoria. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema al crear el cupon_categoria. Error: {ex.Message}");
             }

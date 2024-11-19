@@ -10,15 +10,16 @@ namespace CuponesApiTp.Controllers
     [ApiController]
     public class ArticuloCategoriaController : Controller
     {
-
         private readonly DataBaseContext _context;
 
         public ArticuloCategoriaController(DataBaseContext context)
         {
             _context = context;
         }
-        [HttpPost]
-        public async Task<ActionResult> AddCuponesToCategoria(int idCategoria, [FromBody] List<int> idsCupones)
+
+        // Endpoint para asignar uno o varios artículos a una categoría
+        [HttpPost("AddArticulosToCategoria")]
+        public async Task<ActionResult> AddArticulosToCategoria(int idCategoria, [FromBody] List<int> idsArticulos)
         {
             try
             {
@@ -31,38 +32,34 @@ namespace CuponesApiTp.Controllers
                     return NotFound("La categoría no existe.");
                 }
 
-                // Filtrar los cupones que existen
-                var cupones = await _context.Cupones
-                    .Where(c => idsCupones.Contains(c.Id_Cupon))
+                // Filtrar los artículos que existen y están activos
+                var articulos = await _context.Articulos
+                    .Where(a => idsArticulos.Contains(a.Id_Articulo) && a.Activo)
                     .ToListAsync();
 
-                if (!cupones.Any())
+                if (!articulos.Any())
                 {
-                    return NotFound("No se encontraron cupones válidos para asignar.");
+                    return NotFound("No se encontraron artículos válidos para asignar.");
                 }
 
-                // Crear las relaciones entre los cupones y la categoría
-                var relaciones = cupones.Select(c => new Cupon_CategoriaModel
+                // Actualizar la relación de cada artículo con la categoría
+                foreach (var articulo in articulos)
                 {
-                    Id_Cupon = c.Id_Cupon,
-                    Id_Categoria = idCategoria
-                }).ToList();
+                    articulo.id_categoria = idCategoria;
+                }
 
-                _context.Cupones_Categorias.AddRange(relaciones);
                 await _context.SaveChangesAsync();
 
-                return Created("AddCuponesToCategoria", new
+                return Created("AddArticulosToCategoria", new
                 {
-                    message = $"Se asignaron {relaciones.Count} cupones a la categoría '{categoria.Nombre}'.",
-                    detalles = relaciones
+                    message = $"Se asignaron {articulos.Count} artículos a la categoría '{categoria.Nombre}'.",
+                    articulos = articulos.Select(a => new { a.Id_Articulo, a.Nombre_Articulo })
                 });
             }
             catch (Exception ex)
             {
-                return BadRequest($"Ocurrió un error al asignar los cupones a la categoría. Detalles: {ex.Message}");
+                return BadRequest($"Ocurrió un error al asignar los artículos a la categoría. Detalles: {ex.Message}");
             }
         }
-
-
     }
 }

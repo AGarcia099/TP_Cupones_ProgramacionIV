@@ -38,6 +38,31 @@ namespace CuponesApiTp.Data
             modelBuilder.Entity<Cupones_HistorialModel>()
                .HasKey(c => new { c.Id_Cupon, c.NroCupon });
 
+            modelBuilder.Entity<ArticuloModel>()
+                .HasOne(a => a.Categoria) // Cada artículo tiene una categoría
+                .WithMany(c => c.Articulos) // Cada categoría puede tener muchos artículos
+                .HasForeignKey(a => a.id_categoria) // Relación por la clave foránea 'id_categoria'
+                .OnDelete(DeleteBehavior.SetNull); // Al eliminar la categoría, se establece la categoría a NULL en los artículos (asegúrate de permitir valores NULL en la base de datos)
+
+            // Configuración de relaciones entre Cupones y Categorias
+            modelBuilder.Entity<Cupon_CategoriaModel>()
+                .HasOne(cc => cc.Cupon)
+                .WithMany(c => c.Cupones_Categorias)
+                .HasForeignKey(cc => cc.Id_Cupon)
+                .OnDelete(DeleteBehavior.Cascade); // Cascada para eliminar los cupones relacionados
+
+            modelBuilder.Entity<Cupon_CategoriaModel>()
+                .HasOne(cc => cc.Categoria)
+                .WithMany(c => c.Cupones_Categorias)
+                .HasForeignKey(cc => cc.Id_Categoria)
+                .OnDelete(DeleteBehavior.Cascade); // Cascada para eliminar las relaciones cuando se elimina una categoría
+
+            modelBuilder.Entity<Cupon_ClienteModel>()
+                .HasOne(cc => cc.Cupon) // Definir relación entre Cupon_ClienteModel y CuponModel
+                .WithMany(c => c.Cupones_Clientes) // Un cupón puede tener muchos registros en Cupon_Clientes
+                .HasForeignKey(cc => cc.Id_Cupon) // La clave foránea es 'Id_Cupon'
+                .OnDelete(DeleteBehavior.Cascade); // Puedes establecer el comportamiento de eliminación (en este caso, cascada)
+
             base.OnModelCreating(modelBuilder);
         }
     }
