@@ -55,11 +55,29 @@ namespace CuponesApiTp.Controllers
         {
             try
             {
-               
-                var cupones = await _context.Cupones_Clientes
-                    .Where(cc => cc.CodCliente == codCliente)
-                    .Include(cc => cc.Cupon) 
+                var fechaActual = DateTime.Now;
+
+                var cuponesCliente = await _context.Cupones_Clientes
+                    .Where(cc => cc.CodCliente.ToLower() == codCliente.ToLower())
+                    .Select(cc => cc.Id_Cupon)
                     .ToListAsync();
+
+                if (!cuponesCliente.Any())
+                {
+                    Log.Error($"No se encontraron cupones asociados al cliente con código '{codCliente}'.");
+                    return NotFound($"No se encontraron cupones asociados al cliente con código '{codCliente}'.");
+                }
+
+                var cupones = await _context.Cupones
+                    .Where(c => cuponesCliente.Contains(c.Id_Cupon) &&
+                            c.Activo == true &&
+                            c.FechaInicio.Date <= fechaActual.Date &&
+                            c.FechaFin.Date >= fechaActual.Date)
+                    .Include(c => c.Cupones_Categorias)!
+                        .ThenInclude(cc => cc.Categoria)
+                    .Include(c => c.Tipo_Cupon)
+                    .ToListAsync();
+
 
                 if (cupones == null || !cupones.Any())
                 {
@@ -68,7 +86,7 @@ namespace CuponesApiTp.Controllers
                 }
 
                 Log.Information("Se llamó al endpoint GetCuponesPorCliente");
-                return Ok(cupones.Select(cc => cc.Cupon)); // Retornar solo los cupones
+                return Ok(cupones);
             }
             catch (Exception ex)
             {
