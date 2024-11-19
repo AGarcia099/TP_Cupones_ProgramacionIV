@@ -149,7 +149,11 @@ namespace CuponesApiTp.Controllers
             }
             catch (Exception ex)
             {
-
+                if (ex.InnerException != null)
+                {
+                    return BadRequest($"Error interno: {ex.InnerException.Message}");
+                }
+                return BadRequest($"Ocurrió un error: {ex.Message}");
 
                 Log.Error($"Hubo un problema en PostArticulo. Error: {ex.Message}");
                 return BadRequest($"Hubo un problema. Error: {ex.Message}");

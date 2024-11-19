@@ -71,64 +71,7 @@ namespace CuponesApiTp.Controllers
             }
         }
 
-        // PUT: api/Cupones_Historial/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCupones_HistorialModel(int id, Cupones_HistorialModel cupones_HistorialModel)
-        {
-            if (id != cupones_HistorialModel.Id_Cupon)
-            {
-                Log.Error("El id ingresado no coincide con ningun Id_Cupon");
-                return BadRequest("El ID proporcionado no coincide con el Id_Cupon del historial.");
-            }
-
-            _context.Entry(cupones_HistorialModel).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-
-                Log.Information("Se llamo al endpoint PutCupones_Historial");
-                return Ok($"Los datos del Cupon_Historial con Id_Cupon '{id}' fueron modificados correctamente.");
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Ocurrio un problema en PutCupones_Historial. Error: {ex.Message}");
-                return BadRequest($"Hubo un problema al intentar actualizar el Cupon_Historial con Id_Cupon '{id}'. Error: {ex.Message}");
-            }
-        }
-
-        // POST: api/Cupones_Historial
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Cupones_HistorialModel>> PostCupones_HistorialModel(Cupones_HistorialModel cupones_HistorialModel)
-        {
-            if (string.IsNullOrEmpty(cupones_HistorialModel.NroCupon))
-            {
-                Log.Error("El NroCupon es obligatorio");
-                return BadRequest("El NroCupon es obligatorio.");
-            }
-
-            if (string.IsNullOrEmpty(cupones_HistorialModel.CodCliente))
-            {
-                Log.Error("El CodCliente es obligatorio");
-                return BadRequest("El CodCliente es obligatorio.");
-            }
-
-            _context.Cupones_Historial.Add(cupones_HistorialModel);
-            try
-            {
-                await _context.SaveChangesAsync();
-
-                Log.Information("Se llamo al endpoint PostCupones_Historial");
-                return CreatedAtAction("GetCupones_HistorialModel", new { id = cupones_HistorialModel.Id_Cupon }, cupones_HistorialModel);
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Ocurrio un problema en PostCupones_Historial. Error: {ex.Message}");
-                return BadRequest($"Hubo un problema al intentar crear el Cupon_Historial. Error: {ex.Message}");
-            }
-        }
+        
 
         // DELETE: api/Cupones_Historial/5
         [HttpDelete("{id}")]

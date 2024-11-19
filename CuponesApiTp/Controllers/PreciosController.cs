@@ -66,6 +66,11 @@ namespace CuponesApiTp.Controllers
             }
             catch (Exception ex)
             {
+                if (ex.InnerException != null)
+                {
+                    return BadRequest($"Error interno: {ex.InnerException.Message}");
+                }
+                return BadRequest($"Ocurrió un error: {ex.Message}");
                 Log.Error($"Hubo un problema en AsignarPrecio. Error: {ex.Message}");
                 return BadRequest($"Ocurrió un error al intentar asignar el precio: {ex.Message}");
             }
